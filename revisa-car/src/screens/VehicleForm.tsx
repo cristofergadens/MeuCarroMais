@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Alert, View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { Alert, View, Text, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
 import { RootStackParamList } from '../navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,7 +18,7 @@ export default function VehicleForm({ navigation, route }: Props) {
   useEffect(() => {
     if (route.params?.vehicle) {
       const vehicle = route.params.vehicle;
-      
+
       setMarca(vehicle.marca);
       setModelo(vehicle.modelo);
       setAno(vehicle.ano.toString());
@@ -42,25 +42,24 @@ export default function VehicleForm({ navigation, route }: Props) {
       ano: parseInt(ano),
       quilometragem: parseInt(quilometragem),
       placa,
-    }; 
+    };
 
     try {
       const data = await AsyncStorage.getItem('@veiculos');
       const lista = data ? JSON.parse(data) : [];
-      
+
       if (isEditing) {
-        const updatedList = lista.map((vehicle: any) => 
+        const updatedList = lista.map((vehicle: any) =>
           vehicle.id === vehicleId ? novoVeiculo : vehicle
         );
         await AsyncStorage.setItem('@veiculos', JSON.stringify(updatedList));
         Alert.alert('Sucesso', 'Veículo atualizado com sucesso.');
       } else {
-        // Adiciona novo veículo
         lista.push(novoVeiculo);
         await AsyncStorage.setItem('@veiculos', JSON.stringify(lista));
         Alert.alert('Sucesso', 'Veículo salvo com sucesso.');
       }
-      
+
       navigation.goBack();
     } catch (error) {
       Alert.alert('Erro', 'Erro ao salvar veículo.');
@@ -68,7 +67,9 @@ export default function VehicleForm({ navigation, route }: Props) {
   };
 
   return (
+
     <View style={styles.container}>
+      <View style={styles.form}>
       <Text style={styles.label}>Marca</Text>
       <TextInput value={marca} onChangeText={setMarca} style={styles.input} />
 
@@ -83,8 +84,11 @@ export default function VehicleForm({ navigation, route }: Props) {
 
       <Text style={styles.label}>Placa</Text>
       <TextInput value={placa} onChangeText={setPlaca} style={styles.input} />
+      </View>
 
-      <Button title={isEditing ? "Atualizar" : "Salvar"} onPress={handleSalvar} />
+      <TouchableOpacity style={styles.saveButton} onPress={handleSalvar}>
+        <Text style={styles.saveButtonText}>Cadastrar veículo</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -104,6 +108,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 6,
     borderRadius: 5,
-    marginTop:4, 
+    marginTop: 4,
+  },
+  form: {
+    flex: 1
+  },
+  saveButton: {
+    padding: 15,
+    backgroundColor: '#3ba4d8',
+    alignItems: 'center',
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   }
 });
