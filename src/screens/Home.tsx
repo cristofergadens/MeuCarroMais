@@ -1,8 +1,10 @@
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text, View, StyleSheet, FlatList, TouchableOpacity } from "react-native";
 import { RootStackParamList } from "../navigation";
 import { useEffect, useState } from "react";
+import { useTheme } from "../contexts/ThemeContext";
+import { getThemeColors, spacing, borderRadius, typography } from "../styles/theme";
 
 import Feather from '@expo/vector-icons/Feather';
 
@@ -19,6 +21,8 @@ type Vehicle = {
 
 export default function Home({ navigation }: Props) {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   const getVehicles = async (): Promise<Vehicle[]> => {
     const data = await AsyncStorage.getItem('@veiculos');
@@ -51,32 +55,44 @@ export default function Home({ navigation }: Props) {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Meus Veículos</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={styles.header}>
+        <Text style={[styles.title, { color: colors.text }]}>Meus Veículos</Text>
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('Settings')}
+          style={styles.settingsButton}
+        >
+          <Feather name="settings" size={24} color={colors.text} />
+        </TouchableOpacity>
+      </View>
 
       {vehicles.length === 0 ? (
-        <Text style={styles.info}>Nenhum veículo cadastrado</Text>
+        <Text style={[styles.info, { color: colors.textMuted }]}>Nenhum veículo cadastrado</Text>
       ) : (
         <FlatList
           data={vehicles}
           keyExtractor={(vehicle) => vehicle.id.toString()}
           renderItem={({ item }) => (
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.border }]}>
               <View style={styles.cardInfo}>
-                <Text style={styles.carTitle}>
+                <Text style={[styles.carTitle, { color: colors.text }]}>
                   {item.marca} {item.modelo} - ({item.ano})
                 </Text>
-                <Text style={styles.carInformation}>Quilometragem: {item.quilometragem} km - Placa: {item.placa}</Text>
+                <Text style={[styles.carInformation, { color: colors.textSecondary }]}>
+                  Quilometragem: {item.quilometragem} km - Placa: {item.placa}
+                </Text>
               </View>
               <View style={styles.cardActions}>
-                <Feather 
-                  name="edit" 
-                  size={20} 
-                  color="gray" 
-                  onPress={() => navigation.navigate('VehicleForm', { vehicle: item })}
-                />
-                <Feather name="trash-2" size={20} color="red" onPress={() => deleteVehicle(item.id)}/>
-
+                <TouchableOpacity onPress={() => navigation.navigate('VehicleForm', { vehicle: item })}>
+                  <Feather 
+                    name="edit" 
+                    size={20} 
+                    color={colors.textSecondary} 
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => deleteVehicle(item.id)}>
+                  <Feather name="trash-2" size={20} color={colors.error} />
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -84,7 +100,7 @@ export default function Home({ navigation }: Props) {
       )}
 
       <TouchableOpacity 
-        style={styles.newCarButton} 
+        style={[styles.newCarButton, { backgroundColor: colors.primary }]} 
         onPress={() => navigation.navigate('VehicleForm')}
       >
         <Text style={styles.newCarButtonText}>Cadastrar veículo</Text>
@@ -96,51 +112,57 @@ export default function Home({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    padding: spacing.md,
     flex: 1,
   },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
+    ...typography.h1,
+  },
+  settingsButton: {
+    padding: spacing.sm,
   },
   info: {
     textAlign: 'center',
-    marginVertical: 20,
-    color: '#777',
+    marginVertical: spacing.lg,
+    ...typography.body,
   },
   card: {
-    backgroundColor: '#fefefe',
-    padding: 15,
-    marginBottom: 10,
-    borderRadius: 8,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    borderRadius: borderRadius.md,
     flexDirection: 'row', 
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    borderWidth: 1,
   },
   cardInfo: {
-
+    flex: 1,
   },
   cardActions: {
     flexDirection: "row",
-    gap: 6
+    gap: spacing.sm,
   },
   carTitle: {
-    fontWeight: 'bold',
-    fontSize: 18,
+    ...typography.h3,
+    marginBottom: spacing.xs,
   },
   carInformation: {
-    color: '#555',
+    ...typography.caption,
   },
   newCarButton: {
-    padding: 15,
-    backgroundColor: '#3ba4d8',
+    padding: spacing.md,
     alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
   },
   newCarButtonText: {
     color: 'white',
-    fontSize: 16,
+    ...typography.body,
     fontWeight: 'bold',
   }
 });

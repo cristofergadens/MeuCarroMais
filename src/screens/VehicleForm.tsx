@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Alert, View, Text, TextInput, Button, StyleSheet, TouchableOpacity, SafeAreaView } from "react-native";
+import { Alert, View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
 import { RootStackParamList } from '../navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "../contexts/ThemeContext";
+import { getThemeColors, spacing, borderRadius, typography } from "../styles/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'VehicleForm'>;
 
@@ -14,6 +16,8 @@ export default function VehicleForm({ navigation, route }: Props) {
   const [quilometragem, setQuilometragem] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [vehicleId, setVehicleId] = useState<number | null>(null);
+  const { theme } = useTheme();
+  const colors = getThemeColors(theme);
 
   useEffect(() => {
     if (route.params?.vehicle) {
@@ -67,27 +71,73 @@ export default function VehicleForm({ navigation, route }: Props) {
   };
 
   return (
-
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.form}>
-      <Text style={styles.label}>Marca</Text>
-      <TextInput value={marca} onChangeText={setMarca} style={styles.input} />
+        <Text style={[styles.label, { color: colors.text }]}>Marca</Text>
+        <TextInput 
+          value={marca} 
+          onChangeText={setMarca} 
+          style={[styles.input, { 
+            borderColor: colors.border, 
+            backgroundColor: colors.surface,
+            color: colors.text 
+          }]} 
+        />
 
-      <Text style={styles.label}>Modelo</Text>
-      <TextInput value={modelo} onChangeText={setModelo} style={styles.input} />
+        <Text style={[styles.label, { color: colors.text }]}>Modelo</Text>
+        <TextInput 
+          value={modelo} 
+          onChangeText={setModelo} 
+          style={[styles.input, { 
+            borderColor: colors.border, 
+            backgroundColor: colors.surface,
+            color: colors.text 
+          }]} 
+        />
 
-      <Text style={styles.label}>Ano</Text>
-      <TextInput value={ano} onChangeText={setAno} keyboardType="numeric" style={styles.input} />
+        <Text style={[styles.label, { color: colors.text }]}>Ano</Text>
+        <TextInput 
+          value={ano} 
+          onChangeText={setAno} 
+          keyboardType="numeric" 
+          style={[styles.input, { 
+            borderColor: colors.border, 
+            backgroundColor: colors.surface,
+            color: colors.text 
+          }]} 
+        />
 
-      <Text style={styles.label}>Quilometragem</Text>
-      <TextInput value={quilometragem} onChangeText={setQuilometragem} keyboardType="numeric" style={styles.input} />
+        <Text style={[styles.label, { color: colors.text }]}>Quilometragem</Text>
+        <TextInput 
+          value={quilometragem} 
+          onChangeText={setQuilometragem} 
+          keyboardType="numeric" 
+          style={[styles.input, { 
+            borderColor: colors.border, 
+            backgroundColor: colors.surface,
+            color: colors.text 
+          }]} 
+        />
 
-      <Text style={styles.label}>Placa</Text>
-      <TextInput value={placa} onChangeText={setPlaca} style={styles.input} />
+        <Text style={[styles.label, { color: colors.text }]}>Placa</Text>
+        <TextInput 
+          value={placa} 
+          onChangeText={setPlaca} 
+          style={[styles.input, { 
+            borderColor: colors.border, 
+            backgroundColor: colors.surface,
+            color: colors.text 
+          }]} 
+        />
       </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSalvar}>
-        <Text style={styles.saveButtonText}>Cadastrar veículo</Text>
+      <TouchableOpacity 
+        style={[styles.saveButton, { backgroundColor: colors.primary }]} 
+        onPress={handleSalvar}
+      >
+        <Text style={styles.saveButtonText}>
+          {isEditing ? "Atualizar" : "Cadastrar veículo"}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -96,33 +146,34 @@ export default function VehicleForm({ navigation, route }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: spacing.md,
   },
   label: {
+    ...typography.body,
     fontWeight: 'bold',
-    marginTop: 10,
+    marginTop: spacing.md,
+    marginBottom: spacing.xs,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 5,
-    marginTop: 4,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: borderRadius.sm,
+    marginBottom: spacing.sm,
+    ...typography.body,
   },
   form: {
     flex: 1
   },
   saveButton: {
-    padding: 15,
-    backgroundColor: '#3ba4d8',
+    padding: spacing.md,
     alignItems: 'center',
-    borderRadius: 8,
-    marginBottom: 20,
+    borderRadius: borderRadius.md,
+    marginBottom: spacing.md,
   },
   saveButtonText: {
     color: 'white',
-    fontSize: 16,
+    ...typography.body,
     fontWeight: 'bold',
   }
 });
