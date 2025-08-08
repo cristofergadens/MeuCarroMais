@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -7,7 +6,7 @@ import VehicleForm from '../screens/VehicleForm';
 
 export type RootStackParamList = {
   Home: undefined;
-  VehicleForm: undefined;
+  VehicleForm: { vehicle?: any } | undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -24,7 +23,9 @@ export default function AppNavigator() {
         <Stack.Screen
           name="VehicleForm"
           component={VehicleForm}
-          options={{ title: 'Cadastrar Veículo' }}
+          options={({ route }) => ({ 
+            title: route.params?.vehicle ? 'Editar Veículo' : 'Cadastrar Veículo' 
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Alert, View, Text, TextInput, Button, StyleSheet } from "react-native";
 import { RootStackParamList } from '../navigation';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -6,12 +6,28 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'VehicleForm'>;
 
-export default function VehicleForm({ navigation }: Props) {
+export default function VehicleForm({ navigation, route }: Props) {
   const [marca, setMarca] = useState('');
   const [modelo, setModelo] = useState('');
   const [ano, setAno] = useState('');
   const [placa, setPlaca] = useState('');
   const [quilometragem, setQuilometragem] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [vehicleId, setVehicleId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (route.params?.vehicle) {
+      const vehicle = route.params.vehicle;
+      
+      setMarca(vehicle.marca);
+      setModelo(vehicle.modelo);
+      setAno(vehicle.ano.toString());
+      setPlaca(vehicle.placa);
+      setQuilometragem(vehicle.quilometragem.toString());
+      setVehicleId(vehicle.id);
+      setIsEditing(true);
+    }
+  }, [route.params]);
 
   const handleSalvar = async () => {
     if (!marca || !modelo || !ano || !quilometragem || !placa) {
@@ -20,20 +36,31 @@ export default function VehicleForm({ navigation }: Props) {
     }
 
     const novoVeiculo = {
-      i: Date.now(),
+      id: isEditing ? vehicleId : Date.now(),
       marca,
       modelo,
-      ano,
-      quilometragem,
+      ano: parseInt(ano),
+      quilometragem: parseInt(quilometragem),
       placa,
     }; 
 
     try {
       const data = await AsyncStorage.getItem('@veiculos');
       const lista = data ? JSON.parse(data) : [];
-      lista.push(novoVeiculo);
-      await AsyncStorage.setItem('@veiculos', JSON.stringify(lista));
-      Alert.alert('Sucesso', 'Veículo salvo com sucesso.');
+      
+      if (isEditing) {
+        const updatedList = lista.map((vehicle: any) => 
+          vehicle.id === vehicleId ? novoVeiculo : vehicle
+        );
+        await AsyncStorage.setItem('@veiculos', JSON.stringify(updatedList));
+        Alert.alert('Sucesso', 'Veículo atualizado com sucesso.');
+      } else {
+        // Adiciona novo veículo
+        lista.push(novoVeiculo);
+        await AsyncStorage.setItem('@veiculos', JSON.stringify(lista));
+        Alert.alert('Sucesso', 'Veículo salvo com sucesso.');
+      }
+      
       navigation.goBack();
     } catch (error) {
       Alert.alert('Erro', 'Erro ao salvar veículo.');
@@ -57,7 +84,7 @@ export default function VehicleForm({ navigation }: Props) {
       <Text style={styles.label}>Placa</Text>
       <TextInput value={placa} onChangeText={setPlaca} style={styles.input} />
 
-      <Button title="Salvar" onPress={handleSalvar} />
+      <Button title={isEditing ? "Atualizar" : "Salvar"} onPress={handleSalvar} />
     </View>
   );
 }

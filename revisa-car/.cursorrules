@@ -1,0 +1,6 @@
+# Desabilitar todas as funcionalidades de IA do Cursor
+DISABLE_AI_AUTOCOMPLETE=true
+DISABLE_AI_SUGGESTIONS=true
+DISABLE_AI_INLINE=true
+DISABLE_AI_CHAT=true
+DISABLE_AI_COMMANDS=true 
